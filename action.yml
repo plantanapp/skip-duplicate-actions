@@ -28,6 +28,10 @@ inputs:
     description: 'If true, skip if an already finished duplicate run can be found'
     required: false
     default: 'true'
+  skip_after_successful_duplicate_all_runs:
+    description: 'If true, skip_after_successful_duplicate will look through all runs, instead of only the older ones.'
+    required: false
+    default: 'false'
   do_not_skip:
     description: 'A JSON-array with triggers that should never be skipped'
     required: false
