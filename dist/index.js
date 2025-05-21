@@ -165,7 +165,9 @@ class SkipDuplicateActions {
         });
     }
     findSuccessfulDuplicateRun(treeHash) {
-        return this.context.olderRuns.find(run => run.treeHash === treeHash &&
+        return (this.inputs.skipAfterSuccessfulDuplicatesAllRuns
+            ? this.context.allRuns
+            : this.context.olderRuns).find(run => run.treeHash === treeHash &&
             run.status === 'completed' &&
             run.conclusion === 'success');
     }
@@ -330,7 +332,8 @@ function main() {
             doNotSkip: getDoNotSkipInput('do_not_skip'),
             concurrentSkipping: getConcurrentSkippingInput('concurrent_skipping'),
             cancelOthers: core.getBooleanInput('cancel_others'),
-            skipAfterSuccessfulDuplicates: core.getBooleanInput('skip_after_successful_duplicate')
+            skipAfterSuccessfulDuplicates: core.getBooleanInput('skip_after_successful_duplicate'),
+            skipAfterSuccessfulDuplicatesAllRuns: core.getBooleanInput('skip_after_successful_duplicate_all_runs')
         };
         const repo = github.context.repo;
         const octokit = new Octokit((0, utils_1.getOctokitOptions)(token));
@@ -437,7 +440,7 @@ function exitSuccess(args) {
             summary.push('<tr>', '<td>Changed Files</td>', `<td>${changedFiles}</td>`, '</tr>');
         }
         summary.push('</table>');
-        const skipSummary = core.getBooleanInput("skip_summary");
+        const skipSummary = core.getBooleanInput('skip_summary');
         if (!skipSummary) {
             yield core.summary.addRaw(summary.join('')).write();
         }

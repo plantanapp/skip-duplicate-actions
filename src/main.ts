@@ -89,6 +89,7 @@ type Inputs = {
   concurrentSkipping: ConcurrentSkipping
   cancelOthers: boolean
   skipAfterSuccessfulDuplicates: boolean
+  skipAfterSuccessfulDuplicatesAllRuns: boolean
 }
 
 type Context = {
@@ -223,7 +224,11 @@ class SkipDuplicateActions {
   }
 
   findSuccessfulDuplicateRun(treeHash: string): WorkflowRun | undefined {
-    return this.context.olderRuns.find(
+    return (
+      this.inputs.skipAfterSuccessfulDuplicatesAllRuns
+        ? this.context.allRuns
+        : this.context.olderRuns
+    ).find(
       run =>
         run.treeHash === treeHash &&
         run.status === 'completed' &&
@@ -459,6 +464,9 @@ async function main(): Promise<void> {
     cancelOthers: core.getBooleanInput('cancel_others'),
     skipAfterSuccessfulDuplicates: core.getBooleanInput(
       'skip_after_successful_duplicate'
+    ),
+    skipAfterSuccessfulDuplicatesAllRuns: core.getBooleanInput(
+      'skip_after_successful_duplicate_all_runs'
     )
   }
 
@@ -611,7 +619,7 @@ async function exitSuccess(args: {
     )
   }
   summary.push('</table>')
-  const skipSummary = core.getBooleanInput("skip_summary")
+  const skipSummary = core.getBooleanInput('skip_summary')
   if (!skipSummary) {
     await core.summary.addRaw(summary.join('')).write()
   }
